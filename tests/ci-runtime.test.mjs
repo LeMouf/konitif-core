@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 test('CI and publication use the same checked cached runtime and checkout', () => {
   for (const workflow of ['ci.yml', 'publish.yml']) {
@@ -13,7 +14,7 @@ test('CI and publication use the same checked cached runtime and checkout', () =
 });
 
 test('runtime selection refuses a missing cache without installing a fallback', { skip: process.platform === 'win32' }, () => {
-  const result = spawnSync('bash', [new URL('../scripts/select-ci-runtime.sh', import.meta.url).pathname], {
+  const result = spawnSync('bash', [fileURLToPath(new URL('../scripts/select-ci-runtime.sh', import.meta.url))], {
     env: { PATH: process.env.PATH, GITHUB_PATH: '/dev/null' }, encoding: 'utf8',
   });
   assert.equal(result.error, undefined);
