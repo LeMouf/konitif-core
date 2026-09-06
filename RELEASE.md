@@ -4,18 +4,31 @@ Owner-confirmed first public version: `0.284.1`; expected tag: `v0.284.1`.
 Preserve continuity with the existing source and catalogs. A fresh Git history
 does not reset package versions. This decision does not create a tag or release.
 
-The validation workflow is prepared, not yet executed on GitHub. It uses the
-runner's preinstalled Node/npm, prints their versions, refuses Node below 22,
-and does not install a runtime. Only the locked TypeScript dependency is installed.
-The existing checkout v4 action is reused. Review/pin its commit before release
-hardening; the runtime environment is not yet fully pinned.
+## Activation checkpoint (2026-09-06)
+
+Core 0.284.1 was published manually to bootstrap the npm package. Its registry
+integrity matches the verified archive:
+`sha512-zUxINek1Po4SAy0m/3si4CndR4tGlxiyt9WssGxiQzXe8p07US+3zH4r7aPa6Mr/MBTmjXMZCIlVjMnhFQkXVw==`.
+This first publication has no GitHub OIDC provenance. Do not republish it.
+The owner configured main protection, the npm-release environment and the npm
+trusted publisher (LeMouf/konitif-core, publish.yml, npm-release, direct publish).
+An actual OIDC publication remains untested; leave activation disabled until
+the updated CI passes and a new version is deliberately prepared.
+
+Baseline validation run 34025151610 succeeded, but its default npm 10.9.8 is
+too old for OIDC. Both workflows now select the already cached Node 24.20.0
+from the reviewed ubuntu-24.04 image and validate its bundled npm against the
+OIDC minimum. Missing cache or incompatible npm fails without downloading a
+fallback. Only the locked TypeScript dependency is installed. Checkout is pinned
+to the exact revision used in the successful baseline CI. The runner image itself
+remains rolling; this is not a fully hermetic build.
 
 The workflow grants read-only repository permission, disables persisted checkout
 credentials, and has no publish command or OIDC permission. Pull requests cannot
 publish a package through this workflow. The package check extracts a local
 archive for runtime/type checks; it does not install a registry consumer.
 
-Before enabling releases:
+Release checklist (some steps completed in the checkpoint above):
 
 1. Provide authenticated access to the approved public LeMouf/konitif-core
    destination and verify the npm scope owner. Never put credentials in source.
@@ -55,7 +68,8 @@ Official requirements: https://docs.npmjs.com/trusted-publishers/
 Preinstalled Node must be at least 22.14.0 and npm at least 11.5.1. The workflow
 fails rather than installing/upgrading either. The local npm 10.9.4 intentionally
 fails this publishing gate; local build/package verification remains available.
-The runner toolchain and checkout action still require exact revision hardening.
+The bundled npm version is checked at runtime; runner image updates may require
+a reviewed change to the pinned cache version.
 
 Only the publish job receives `id-token: write`; no long-lived npm token is
 configured. `verify:package` checks a packed archive using an external runtime
@@ -64,10 +78,11 @@ when `CORE_RELEASE_ARCHIVE=true`. Publication uses it with public access,
 provenance, explicit npm registry and lifecycle scripts disabled. Version
 publication is not automatically rolled back or overwritten on failure.
 
-First-package scope ownership/bootstrap is still an activation gate: confirm
-how the package is registered and its trusted publisher enabled before pushing
-the first release tag. No manual-token fallback is encoded in the workflow.
-No GitHub workflow execution, tag creation or npm publication has occurred here.
+First-package bootstrap is complete. No manual-token fallback is encoded in the
+workflow. No release tag or OIDC publication has been created by this preparation.
+The next release must use a new version, with manifest, lock, exported version
+and catalogs kept consistent. Keep CORE_NPM_PUBLISH_ENABLED disabled while
+recording any historical v0.284.1 tag so it cannot trigger a duplicate publish.
 
 Local reproduction in an isolated Core checkout:
 
