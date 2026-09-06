@@ -1,0 +1,280 @@
+{
+  "schemaVersion": "1.0.0",
+  "package": "@konitif/core",
+  "intent": "Fournir les contrats amodaux minimaux qui permettent de décrire, adresser et manipuler une application KONITIF sans dépendre d'un runtime ou d'une projection particulière.",
+  "clusters": [
+    {
+      "id": "application",
+      "title": "Application et manifeste",
+      "summary": "Déclare l'identité d'une application et compose son manifeste d'outils.",
+      "authority": "Déclaration authored de l'application.",
+      "owns": [
+        "identité déclarée",
+        "inventaire déclaré des outils"
+      ],
+      "doesNotOwn": [
+        "cycle de vie runtime",
+        "état des outils"
+      ],
+      "workflow": [
+        "Définir les outils",
+        "Définir l'application",
+        "Composer le manifeste"
+      ],
+      "sources": [
+        "app.ts",
+        "manifest.ts"
+      ]
+    },
+    {
+      "id": "tools-capabilities",
+      "title": "Tools et capacités",
+      "summary": "Déclare ce qu'un outil fournit, consomme et exige de son host.",
+      "authority": "Contrat déclaré par l'auteur du tool.",
+      "owns": [
+        "identité du tool",
+        "capacités déclarées",
+        "contraintes de version"
+      ],
+      "doesNotOwn": [
+        "admission par le host",
+        "exécution du domaine"
+      ],
+      "workflow": [
+        "Déclarer les capacités",
+        "Normaliser le manifeste",
+        "Comparer les versions"
+      ],
+      "sources": [
+        "tool.ts"
+      ]
+    },
+    {
+      "id": "commands",
+      "title": "Commandes",
+      "summary": "Enregistre et invoque des opérations adressables dans un contexte explicite.",
+      "authority": "Le registre possède l'adressage ; chaque commande possède son effet.",
+      "owns": [
+        "registre local",
+        "résolution par identifiant"
+      ],
+      "doesNotOwn": [
+        "effet métier de la commande",
+        "confirmation de l'effet réel"
+      ],
+      "workflow": [
+        "Définir une commande",
+        "L'enregistrer",
+        "Vérifier son admission",
+        "L'exécuter"
+      ],
+      "sources": [
+        "command.ts"
+      ]
+    },
+    {
+      "id": "workspace",
+      "title": "Workspace",
+      "summary": "Conserve un état de travail identifiable et produit des snapshots isolés.",
+      "authority": "L'instance KonitifWorkspace possède son état courant en mémoire.",
+      "owns": [
+        "snapshot courant",
+        "nom et métadonnées du workspace"
+      ],
+      "doesNotOwn": [
+        "état métier des tools",
+        "persistance durable",
+        "synchronisation distribuée"
+      ],
+      "workflow": [
+        "Créer depuis un snapshot partiel",
+        "Lire un clone",
+        "Mettre à jour ou réinitialiser"
+      ],
+      "sources": [
+        "workspace.ts"
+      ],
+      "symbols": {
+        "KonitifWorkspaceSnapshot": {
+          "role": "value-contract",
+          "summary": "Forme sérialisable d'un état de workspace à un instant donné.",
+          "useWhen": "Transmettre, sauvegarder ou comparer l'état visible du workspace.",
+          "invariants": [
+            "id et name sont non vides après création",
+            "les métadonnées sont clonées aux frontières"
+          ],
+          "limitations": [
+            "Aucune révision monotone n'est actuellement exposée."
+          ]
+        },
+        "KonitifWorkspace": {
+          "role": "authority-contract",
+          "summary": "Autorité locale qui lit et fait évoluer le snapshot courant.",
+          "useWhen": "Un host doit manipuler un workspace derrière un contrat stable.",
+          "invariants": [
+            "getSnapshot ne révèle pas la référence interne",
+            "update ne modifie que name et metadata"
+          ],
+          "limitations": [
+            "Le contrat ne définit ni persistance ni concurrence."
+          ]
+        },
+        "createInMemoryWorkspace": {
+          "role": "factory",
+          "summary": "Crée une autorité volatile de workspace depuis un état initial partiel.",
+          "useWhen": "Tests, prototypes ou hosts dont la persistance est fournie ailleurs.",
+          "invariants": [
+            "Les valeurs textuelles vides reçoivent un fallback",
+            "createdAt et updatedAt sont initialisés en ISO 8601"
+          ],
+          "limitations": [
+            "Le temps dépend de l'horloge système.",
+            "Le reset crée une nouvelle identité par défaut."
+          ]
+        }
+      }
+    },
+    {
+      "id": "temporal-coordinates",
+      "title": "Temps et frames",
+      "summary": "Convertit temps continu, frames discrètes, plages et cadence.",
+      "authority": "Fonctions pures de conversion et de normalisation.",
+      "owns": [
+        "règles de conversion",
+        "normalisation des plages"
+      ],
+      "doesNotOwn": [
+        "horloge runtime",
+        "transport",
+        "timeline UI"
+      ],
+      "workflow": [
+        "Choisir une cadence",
+        "Convertir ou aligner",
+        "Normaliser la plage"
+      ],
+      "sources": [
+        "timeFrame.ts"
+      ]
+    },
+    {
+      "id": "values-targets",
+      "title": "Valeurs et cibles",
+      "summary": "Associe des valeurs numériques à des cibles et borne leur domaine admissible.",
+      "authority": "Contrats de valeur et opérateurs purs.",
+      "owns": [
+        "forme des valeurs ciblées",
+        "règles de normalisation numérique"
+      ],
+      "doesNotOwn": [
+        "sémantique métier de la cible",
+        "unité physique"
+      ],
+      "workflow": [
+        "Identifier la cible",
+        "Normaliser la plage",
+        "Normaliser ou borner la valeur"
+      ],
+      "sources": [
+        "targetValue.ts"
+      ]
+    },
+    {
+      "id": "temporal-structures",
+      "title": "Structures temporelles",
+      "summary": "Compose keys, tracks, clips, séquences et interpolations sans imposer de projection timeline.",
+      "authority": "Artefacts temporels authored et opérateurs de lecture déterministes.",
+      "owns": [
+        "structure des séquences",
+        "durées dérivées",
+        "échantillonnage d'interpolation"
+      ],
+      "doesNotOwn": [
+        "transport runtime",
+        "effet physique",
+        "édition visuelle"
+      ],
+      "workflow": [
+        "Créer les keys",
+        "Former tracks et clips",
+        "Composer la séquence",
+        "Évaluer l'interpolation"
+      ],
+      "sources": [
+        "key.ts",
+        "track.ts",
+        "clip.ts",
+        "sequence.ts",
+        "interpolation.ts"
+      ]
+    },
+    {
+      "id": "projection-staging",
+      "title": "États projetés et changements préparés",
+      "summary": "Préserve la distinction entre desired, reported et simulated avant tout engagement.",
+      "authority": "Qualification de connaissance et préparation d'un changement.",
+      "owns": [
+        "état de projection déclaré",
+        "forme d'un changement préparé"
+      ],
+      "doesNotOwn": [
+        "commit du changement",
+        "observation de l'effet réel"
+      ],
+      "workflow": [
+        "Qualifier l'état",
+        "Préparer le changement",
+        "Valider sa forme",
+        "Transmettre à une autorité de commit"
+      ],
+      "sources": [
+        "projectionState.ts",
+        "stagedChange.ts"
+      ]
+    },
+    {
+      "id": "artifact-derivation",
+      "title": "Dérivation d'artefacts",
+      "summary": "Décrit une transformation préparée entre une source identifiée et un artefact cible.",
+      "authority": "Draft authored de dérivation, distinct du commit et de son effet.",
+      "owns": [
+        "source déclarée",
+        "changements préparés",
+        "schéma du draft"
+      ],
+      "doesNotOwn": [
+        "écriture de l'artefact",
+        "preuve d'exécution",
+        "confirmation"
+      ],
+      "workflow": [
+        "Identifier la source",
+        "Créer le draft",
+        "Ajouter les changements",
+        "Stager le draft"
+      ],
+      "sources": [
+        "artifactDerivation.ts"
+      ]
+    },
+    {
+      "id": "package-metadata",
+      "title": "Métadonnées du package",
+      "summary": "Expose la version du contrat Core utilisée par le consommateur.",
+      "authority": "Version publiée du package.",
+      "owns": [
+        "version exposée"
+      ],
+      "doesNotOwn": [
+        "compatibilité implicite des consommateurs"
+      ],
+      "workflow": [
+        "Lire la version",
+        "Comparer au contrat attendu"
+      ],
+      "sources": [
+        "version.ts"
+      ]
+    }
+  ]
+}

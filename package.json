@@ -1,0 +1,39 @@
+{
+  "name": "@konitif/core",
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "version": "0.284.1",
+  "private": false,
+  "type": "module",
+  "description": "Amodal contracts and local primitives for KONITIF applications.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeMouf/konitif-core.git"
+  },
+  "publishConfig": { "access": "public" },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "LICENSE.md",
+    "dist",
+    "src",
+    "reference",
+    "README.md",
+    "package.json"
+  ],
+  "devDependencies": {
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test tests/*.test.mjs",
+    "verify:package": "node scripts/verify-package.mjs",
+    "prepack": "npm run build && npm test",
+    "prepublishOnly": "npm run build && npm test"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0.0",
+  "package": "@konitif/core",
+  "diagrams": [
+    {
+      "id": "intent-to-observable-system",
+      "title": "De l'intention au système observable",
+      "kind": "lifecycle",
+      "summary": "Le Core porte les contrats qui font progresser une intention déclarée vers un état manipulable, sans exécuter ni afficher lui-même le produit.",
+      "nodes": [
+        {
+          "id": "intent",
+          "label": "Intention",
+          "description": "Le sens et les effets attendus sont nommés."
+        },
+        {
+          "id": "manifest",
+          "label": "Manifeste",
+          "description": "L'application, ses capacités et contrats sont déclarés."
+        },
+        {
+          "id": "workspace",
+          "label": "Workspace",
+          "description": "Les artefacts et changements sont coordonnés."
+        },
+        {
+          "id": "command",
+          "label": "Commande",
+          "description": "Une transformation admise est demandée.",
+          "tone": "runtime"
+        },
+        {
+          "id": "artifact",
+          "label": "Artefact dérivé",
+          "description": "Un résultat traçable est produit.",
+          "tone": "observation"
+        },
+        {
+          "id": "projection",
+          "label": "Projection",
+          "description": "Une surface peut enfin le rendre perceptible.",
+          "tone": "projection"
+        }
+      ],
+      "edges": [
+        {
+          "from": "intent",
+          "to": "manifest"
+        },
+        {
+          "from": "manifest",
+          "to": "workspace"
+        },
+        {
+          "from": "workspace",
+          "to": "command"
+        },
+        {
+          "from": "command",
+          "to": "artifact"
+        },
+        {
+          "from": "artifact",
+          "to": "projection"
+        }
+      ],
+      "caption": "Le Core définit les briques et leurs frontières ; les runtimes et interfaces restent des consommateurs distincts."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+name: Core validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      # Already used by the development repository; no additional action introduced.
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check preinstalled runtime
+        run: |
+          node --version
+          npm --version
+          node -e "if (Number(process.versions.node.split('.')[0]) < 22) throw Error('Node >=22 required; no automatic runtime installation')"
+      - name: Install locked build dependency
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run build
+      - run: npm test
+      - name: Check distributable
+        run: npm run verify:package
