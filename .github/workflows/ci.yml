@@ -14,15 +14,12 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      # Already used by the development repository; no additional action introduced.
-      - uses: actions/checkout@v4
+      # Exact checkout revision observed in the successful baseline CI.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - name: Check preinstalled runtime
-        run: |
-          node --version
-          npm --version
-          node -e "if (Number(process.versions.node.split('.')[0]) < 22) throw Error('Node >=22 required; no automatic runtime installation')"
+      - name: Select cached publishing-compatible runtime
+        run: bash scripts/select-ci-runtime.sh
       - name: Install locked build dependency
         run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run build
