@@ -4,6 +4,23 @@ Owner-confirmed first public version: `0.284.1`; expected tag: `v0.284.1`.
 Preserve continuity with the existing source and catalogs. A fresh Git history
 does not reset package versions. This decision does not create a tag or release.
 
+## Candidate 0.284.2
+
+Infrastructure-only patch release intended to exercise the protected GitHub OIDC
+publication path. No functional API change; the exported version changes to
+0.284.2. The manifest, lockfile and runtime version are synchronized. Reference
+catalogs contain no package-version field and are unchanged. Historical baseline
+and 0.284.1 publication evidence remain unchanged.
+
+Validation on PR/main must pass before activation. The owner must then set the
+repository Actions variable CORE_NPM_PUBLISH_ENABLED to true (not an environment
+variable: the job-level condition is evaluated before entering npm-release).
+Create v0.284.2 only on the validated merged commit, then approve the protected
+npm-release deployment. A green validation CI is not proof of OIDC publication.
+After publication, verify registry version/integrity and provenance. If a run
+fails after uploading, check the registry before any retry; never overwrite a
+published version. No new release is claimed by this candidate document.
+
 ## Activation checkpoint (2026-09-06)
 
 Core 0.284.1 was published manually to bootstrap the npm package. Its registry
