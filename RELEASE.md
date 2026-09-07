@@ -1,111 +1,96 @@
-# Repository and release activation
+# Core publication policy
 
-Owner-confirmed first public version: `0.284.1`; expected tag: `v0.284.1`.
-Preserve continuity with the existing source and catalogs. A fresh Git history
-does not reset package versions. This decision does not create a tag or release.
+## Published baseline
 
-## Candidate 0.284.2
+Core 0.284.1 was published manually to bootstrap the npm package.
+Core 0.284.2 was subsequently published through GitHub Actions using the protected
+npm OIDC workflow. Its source commit is
+`4ef38c97e7ce9d79587987b7e86a59017c777666`, tag `v0.284.2`.
 
-Infrastructure-only patch release intended to exercise the protected GitHub OIDC
-publication path. No functional API change; the exported version changes to
-0.284.2. The manifest, lockfile and runtime version are synchronized. Reference
-catalogs contain no package-version field and are unchanged. Historical baseline
-and 0.284.1 publication evidence remain unchanged.
+- [Publication run](https://github.com/LeMouf/konitif-core/actions/runs/34027347602)
+- [Published version metadata](https://registry.npmjs.org/@konitif%2fcore/0.284.2)
+- [Attestation](https://registry.npmjs.org/-/npm/v1/attestations/@konitif%2fcore@0.284.2)
 
-Validation on PR/main must pass before activation. The owner must then set the
-repository Actions variable CORE_NPM_PUBLISH_ENABLED to true (not an environment
-variable: the job-level condition is evaluated before entering npm-release).
-Create v0.284.2 only on the validated merged commit, then approve the protected
-npm-release deployment. A green validation CI is not proof of OIDC publication.
-After publication, verify registry version/integrity and provenance. If a run
-fails after uploading, check the registry before any retry; never overwrite a
-published version. No new release is claimed by this candidate document.
+Published archive integrity:
+`sha512-OcvBwJXrSWiRPU+pDBmeGsUikyhFqk1f0OlCpVWJfYbRC8xWICJTBBHh3vkIf/xSfR5lt3YZT0UTq1NoIdMSNQ==`.
 
-## Activation checkpoint (2026-09-06)
+Do not republish either version or move its tag. Documentation and tooling changes
+on main do not change already published artifacts. A future publication requires
+a new version with manifest, lockfile and exported runtime version synchronized.
 
-Core 0.284.1 was published manually to bootstrap the npm package. Its registry
-integrity matches the verified archive:
-`sha512-zUxINek1Po4SAy0m/3si4CndR4tGlxiyt9WssGxiQzXe8p07US+3zH4r7aPa6Mr/MBTmjXMZCIlVjMnhFQkXVw==`.
-This first publication has no GitHub OIDC provenance. Do not republish it.
-The owner configured main protection, the npm-release environment and the npm
-trusted publisher (LeMouf/konitif-core, publish.yml, npm-release, direct publish).
-An actual OIDC publication remains untested; leave activation disabled until
-the updated CI passes and a new version is deliberately prepared.
+## Independent authorities
 
-Baseline validation run 34025151610 succeeded, but its default npm 10.9.8 is
-too old for OIDC. Both workflows now select the already cached Node 24.20.0
-from the reviewed ubuntu-24.04 image and validate its bundled npm against the
-OIDC minimum. Missing cache or incompatible npm fails without downloading a
-fallback. Only the locked TypeScript dependency is installed. Checkout is pinned
-to the exact revision used in the successful baseline CI. The runner image itself
-remains rolling; this is not a fully hermetic build.
+The [ecosystem registry](https://github.com/LeMouf/kontif/blob/main/ecosystem/README.md)
+defines current membership. An ecosystem release is an optional evidence snapshot,
+not a prerequisite for Core publication or inclusion. Inclusion and public
+availability do not grant additional commercial rights. Those rights depend on
+the applicable public licence or an explicit agreement.
 
-The workflow grants read-only repository permission, disables persisted checkout
-credentials, and has no publish command or OIDC permission. Pull requests cannot
-publish a package through this workflow. The package check extracts a local
-archive for runtime/type checks; it does not install a registry consumer.
+This applies to all partnership types. Private nominative agreements and access
+proofs do not belong in this repository. Technical attestations do not verify
+ownership or licensing authority. This policy does not amend LICENSE.md.
 
-Release checklist (some steps completed in the checkpoint above):
+## Publication contract
 
-1. Provide authenticated access to the approved public LeMouf/konitif-core
-   destination and verify the npm scope owner. Never put credentials in source.
-2. Review the allowlisted baseline and create a new Git history. Do not copy the
-   development repository's history or company applications. Confirm source cutover.
-3. Run the CI on GitHub and review the archive for the confirmed first version
-   0.284.1. Verify that tag v0.284.1, manifest, lockfile and exported version agree.
-4. Approve exact publishing toolchain/action revisions and configure npm trusted
-   publishing with a protected release environment. npm 10.9.4 used locally is
-   not sufficient for trusted publishing; no upgrade is authorized by this file.
-5. Activate the prepared `publish.yml` only after the configuration below.
-   Validate the actual registry-installed consumer before migrating applications.
+`publish.yml` runs only on tag pushes in `LeMouf/konitif-core` and when the
+repository Actions variable `CORE_NPM_PUBLISH_ENABLED` is exactly `true`.
+Use a repository variable, not an environment variable: the job condition is
+evaluated before entering `npm-release`.
 
-## Prepared publication contract
+The job verifies that the tagged commit belongs to main history and that tag,
+manifest, lockfile and compiled exported version agree. Only stable versions
+are supported. Build and tests precede the offline package consumer check.
+The exact verified archive is retained as `.release/core.tgz` when
+`CORE_RELEASE_ARCHIVE=true`; only that archive is published, with public access,
+provenance and lifecycle scripts disabled.
 
-`publish.yml` runs only on tag pushes in `LeMouf/konitif-core`, and only when
-the repository variable `CORE_NPM_PUBLISH_ENABLED` is exactly `true`.
-It checks that the tagged commit is in `main` history and that tag, package
-manifest, lockfile and compiled exported version agree. Stable releases only;
-prerelease channels require an explicit policy extension.
+Only the publishing job receives `id-token: write`. Validation CI has read-only
+permissions and does not publish. Checkout credentials are not persisted.
+No manual-token fallback is encoded in the workflow.
 
-The job runs in the `npm-release` environment. Before enabling the variable,
-configure required reviewers and permitted release tags for that environment,
-protect main, restrict tag creation/deletion, and review workflow changes.
-An environment declaration alone does not create approval protection.
+The workflows select cached Node 24.20.0 and the publisher checks npm compatibility.
+Missing cache or incompatible publishing tooling fails without downloading a
+runtime fallback. Only the locked TypeScript 5.9.3 development dependency is
+installed by CI. Checkout is pinned; the runner image remains rolling, not hermetic.
 
-Configure the npm trusted publisher as:
+## Protection checklist
 
-- Owner: `LeMouf`
-- Repository: `konitif-core`
-- Workflow filename: `publish.yml`
-- Environment: `npm-release`
-- Explicitly allow direct `npm publish`, not only staged publishing.
+Before each release:
 
-Official requirements: https://docs.npmjs.com/trusted-publishers/
+1. Require a PR and the GitHub Actions `validate` check on main, with an up-to-date
+   branch; prevent deletion and non-fast-forward pushes.
+2. Verify `npm-release` requires LeMouf approval, disallows administrator bypass
+   and allows only tag pattern `v*`. Self-review remains allowed for a sole
+   maintainer; this is manual approval, not independent second-person review.
+3. Review tag creation, update and deletion protections separately. An environment
+   tag allowlist does not protect Git tags from mutation.
+4. Verify the npm trusted publisher: owner `LeMouf`, repository `konitif-core`,
+   workflow `publish.yml`, environment `npm-release`, direct npm publish allowed.
+5. Confirm the repository activation variable and the exact new version.
+6. Merge the reviewed version PR and validate its main commit before separately
+   authorizing a tag push. Approve the resulting protected deployment.
+7. Verify npm version, archive integrity and provenance. After a partial failure,
+   inspect the registry before retrying; never overwrite a published version.
 
-Preinstalled Node must be at least 22.14.0 and npm at least 11.5.1. The workflow
-fails rather than installing/upgrading either. The local npm 10.9.4 intentionally
-fails this publishing gate; local build/package verification remains available.
-The bundled npm version is checked at runtime; runner image updates may require
-a reviewed change to the pinned cache version.
+Current settings must be checked on GitHub/npm; this document is not proof of
+their continued configuration. Tag policy changes require separate approval.
 
-Only the publish job receives `id-token: write`; no long-lived npm token is
-configured. `verify:package` checks a packed archive using an external runtime
-and TypeScript consumer, then retains that exact archive in `.release/core.tgz`
-when `CORE_RELEASE_ARCHIVE=true`. Publication uses it with public access,
-provenance, explicit npm registry and lifecycle scripts disabled. Version
-publication is not automatically rolled back or overwritten on failure.
+## Local verification
 
-First-package bootstrap is complete. No manual-token fallback is encoded in the
-workflow. No release tag or OIDC publication has been created by this preparation.
-The next release must use a new version, with manifest, lock, exported version
-and catalogs kept consistent. Keep CORE_NPM_PUBLISH_ENABLED disabled while
-recording any historical v0.284.1 tag so it cannot trigger a duplicate publish.
-
-Local reproduction in an isolated Core checkout:
+With the locked development dependency already installed:
 
 ```sh
-npm ci --ignore-scripts --no-audit --no-fund
 npm run build
 npm test
 npm run verify:package
 ```
+
+The verifier uses offline npm packing and an external ESM/TypeScript consumer.
+On Windows it invokes the installed npm CLI through Node instead of executing
+the npm.cmd shim. It neither installs npm nor uses a shell fallback.
+
+For an approved fresh setup, use `npm ci --ignore-scripts --no-audit --no-fund`.
+Dependencies are not installed implicitly by the verifier.
+
+See [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) for provider
+requirements. No tag or publication is authorized by this document alone.

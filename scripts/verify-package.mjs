@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { cpSync, mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -13,7 +13,17 @@ const run = (command, args, cwd = root) => execFileSync(command, args, {
 });
 const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 // Build/tests are explicit preceding steps; packing never installs dependencies.
-const [packed] = JSON.parse(run('npm', ['pack', '--ignore-scripts', '--offline', '--json', '--pack-destination', temp]));
+// Windows npm is a .cmd shim: invoke its installed CLI through Node, not a shell.
+const packArgs = ['pack', '--ignore-scripts', '--offline', '--json', '--pack-destination', temp];
+let packOutput;
+if (process.platform === 'win32') {
+  const npmCli = join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js');
+  assert.ok(existsSync(npmCli), `Installed npm CLI required at ${npmCli}; no automatic installation`);
+  packOutput = run(process.execPath, [npmCli, ...packArgs]);
+} else {
+  packOutput = run('npm', packArgs);
+}
+const [packed] = JSON.parse(packOutput);
 const files = packed.files.map(file => file.path);
 for (const file of files) assert.match(file, /^(dist\/|src\/|reference\/|package\.json$|README\.md$|LICENSE\.md$)/);
 for (const file of ['dist/index.js', 'dist/index.d.ts', 'src/index.ts', 'LICENSE.md']) assert.ok(files.includes(file), file);

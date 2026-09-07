@@ -6,11 +6,10 @@ Public availability does not imply unrestricted commercial usage rights.
 
 ## Installation
 
-The registry distribution is being prepared. Use the following command only
-after the chosen version has been published and verified:
+Core is published on npm. To install the published 0.284.2 version:
 
 ```bash
-pnpm add @konitif/core
+pnpm add @konitif/core@0.284.2
 ```
 
 ## Usage
@@ -55,11 +54,21 @@ passing them to this boundary. This tightens the former shallow-copy behavior.
 `update` cannot change identity or creation time; `reset` explicitly can.
 Durable persistence and distributed synchronization remain host responsibilities.
 
-## Status
+## Ecosystem and partnerships
+
+The [KONITIF ecosystem registry](https://github.com/LeMouf/kontif/blob/main/ecosystem/registry.json)
+owns current membership by reference, independently of optional ecosystem
+releases. Core does not embed a copy of that registry. Membership, technical
+accessibility and legal provenance are distinct from rights granted by the
+applicable public licence or a separate agreement. This common framework can
+support any partnership type; First Partner is one application, not a special
+Core licence. Nominative agreements and access evidence stay in private supports.
+
+## Development
 
 Experimental public API.
 
 Standalone development: `npm ci --ignore-scripts --no-audit --no-fund`,
 `npm run build`, then `npm test`. The lockfile pins TypeScript 5.9.3. Tests
-exercise the compiled public API with Node's built-in test runner. In the
-development monorepo use its pnpm workspace workflow instead of npm ci.
+exercise the compiled public API with Node's built-in test runner. This independent
+repository owns Core source; consuming workspaces reference the published package.
