@@ -10,7 +10,7 @@ separate initial import commit. No npm version has been published by this baseli
 
 Core provides amodal application/tool manifests, command registration, a volatile
 workspace authority, time/value/clip/sequence contracts and derivation primitives.
-It does not provide a UI, robot runtime, durable storage or distributed authority.
+It does not provide a UI, device-specific runtime, durable storage or distributed authority.
 The reference catalogs are documentation, not executable authority.
 
 KONITIF v0.x is source-available under PolyForm Noncommercial 1.0.0; see LICENSE.md.

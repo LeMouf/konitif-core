@@ -1,1 +1,1 @@
-export const KONITIF_CORE_VERSION = '0.284.3';
+export const KONITIF_CORE_VERSION = '0.284.4';
