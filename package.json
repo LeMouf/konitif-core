@@ -1,10 +1,10 @@
 {
   "name": "@konitif/core",
   "license": "PolyForm-Noncommercial-1.0.0",
-  "version": "0.284.3",
+  "version": "0.284.4",
   "private": false,
   "type": "module",
-  "description": "Amodal contracts and local primitives for KONITIF applications.",
+  "description": "Portable amodal contracts and local primitives for KONITIF systems.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LeMouf/konitif-core.git"

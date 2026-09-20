@@ -1,7 +1,7 @@
 # @konitif/core
 
-Amodal contracts and local primitives for building KONITIF applications
-without depending on a UI, renderer or product runtime.
+Portable amodal contracts and local primitives for describing and manipulating
+KONITIF systems independently of any projection or runtime implementation.
 
 ## Installation
 
@@ -21,7 +21,7 @@ npm install @konitif/core
 
 Core defines portable contracts and owns only the state of objects it creates,
 such as an in-memory workspace or command registry. Durable persistence,
-distributed synchronization, rendering, product policy and real-world effect
+distributed synchronization, rendering, domain policy and real-world effect
 confirmation remain responsibilities of explicit consumers.
 
 ## Quick start
